@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Parse
+
   class TimeLineViewController: UIViewController {
     var photoTakingHelper: PhotoTakingHelper?
     //create an instance of a PhotoTakingHelper that will display our popup.
@@ -19,8 +21,20 @@ import UIKit
     func takePhoto() {
         // instantiate photo taking class, provide callback for when photo is selected
         photoTakingHelper = PhotoTakingHelper(viewController: self.tabBarController!) { (image: UIImage?) in
-            // don't do anything, yet...
-            print("received a callback")
+            //if image is not null
+            if let image = image {
+                //converting image to file and specifying image quality
+                //We turn the UIImage into an NSData instance because the PFFile class needs an NSData argument for its initializer.
+                let imageData = UIImageJPEGRepresentation(image, 0.8)!    //The higher the number, the higher the quality but the larger the size as well.
+                let imageFile = PFFile(name: "dog.jpg", data: imageData)!
+                
+                //posting image to Parse class Post's property --> "imageFile"
+                let post = PFObject(className: "Post")
+                post["imageFile"] = imageFile
+                //save picture in Parse database
+                post.saveInBackground()
+            }
+            //print("received a callback")
         }
         //photoTakingHelper = PhotoTakingHelper(viewController: self.tabBarController!) { (image: UIImage?) in
             // don't do anything, yet...

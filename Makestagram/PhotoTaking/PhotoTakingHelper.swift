@@ -74,7 +74,7 @@ extension PhotoTakingHelper: UIImagePickerControllerDelegate, UINavigationContro
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
         viewController.dismissViewControllerAnimated(false, completion: nil)
-        
+        //send selected image
         callback(image)
     }
     

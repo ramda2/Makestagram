@@ -35,6 +35,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         } else {
             print("No logged in user :(")
         }
+        
+        //********************************************CHANGE THE DEFAULT ACL***********************************************
+        //Permit Parse Write Access only to user that created the object (post)
+        let acl = PFACL()
+        acl.publicReadAccess = true
+        PFACL.setDefaultACL(acl, withAccessForCurrentUser: true)
+        //*****************************************************************************************************************
+        
+    
         return true
     }
 

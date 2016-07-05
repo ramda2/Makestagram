@@ -25,7 +25,7 @@ import Parse
         // instantiate photo taking class, provide callback for when photo is selected
         photoTakingHelper = PhotoTakingHelper(viewController: self.tabBarController!) { (image: UIImage?) in
             let post = Post()
-            post.image = image
+            post.image.value = image!
             post.uploadPost()
             }
             //print("received a callback")
@@ -38,16 +38,19 @@ import Parse
             (result: [PFObject]?, error: NSError?) -> Void in
             self.posts = result as? [Post] ?? []
             
-            for post in self.posts {
-                do {
-                    let data = try post.imageFile?.getData()
-                    post.image = UIImage(data: data!, scale:1.0)
-                } catch {
-                    print("could not get image")
-                }
-            }
-            
+            //We no longer want to download all images immediately after the timeline query completes, instead we want to load them lazily as soon as a post is displayed
+            ParseHelper.timelineRequestForCurrentUser { (result: [PFObject]?, error: NSError?) -> Void in
+                self.posts = result as? [Post] ?? []
+//            for post in self.posts {
+//                do {
+//                    let data = try post.imageFile?.getData()
+//                    post.image = UIImage(data: data!, scale:1.0)
+//                } catch {
+//                    print("could not get image")
+//                }
+//            }
             self.tableView.reloadData()
+            }
         }
     }
 }
@@ -82,11 +85,14 @@ extension TimeLineViewController: UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        // 2
         let cell = tableView.dequeueReusableCellWithIdentifier("PostCell") as! PostTableViewCell
         
-        //cell.textLabel!.text = "Post"
-        cell.postImageView.image = posts[indexPath.row].image
+        let post = posts[indexPath.row]
+        // Directly before a post will be displayed, we trigger the image download.
+        post.downloadImage()
+        // cell now takes care of displaying the image that belongs to a Post object itself.
+        cell.post = post
+        
         return cell
     }
 }
